@@ -6,6 +6,8 @@ set ignorecase
 set smartcase
 set encoding=utf8
 set mouse=nicr
+
+
 set directory^="$HOME/.vim/tmp/"
 let g:netrw_liststyle = 3
 set encoding=UTF-8
@@ -117,6 +119,12 @@ Plug 'vim-erlang/vim-erlang-runtime'
 Plug 'vim-erlang/vim-erlang-omnicomplete'
 Plug 'vim-erlang/vim-erlang-compiler'
 
+
+" Javascript Support
+Plug 'pangloss/vim-javascript'
+Plug 'mxw/vim-jsx'
+Plug 'w0rp/ale'
+Plug 'skywind3000/asyncrun.vim'
 " Elixir Support
 Plug 'elixir-lang/vim-elixir'
 Plug 'avdgaag/vim-phoenix'
@@ -254,6 +262,12 @@ augroup markdown
     au BufNewFile,BufRead *.md,*.markdown setlocal filetype=ghmarkdown
 augroup END
 
+" Ale settings 
+
+let g:ale_sign_error = '●' 
+let g:ale_sign_warning = '.'
+let g:ale_lint_on_enter = 0 
+
 " Github Issues Configuration
 let g:github_access_token = "e6fb845bd306a3ca7f086cef82732d1d5d9ac8e0"
 
@@ -328,6 +342,7 @@ function! s:my_cr_function()
   " For no inserting <CR> key.
   "return pumvisible() ? "\<C-y>" : "\<CR>"
 endfunction
+
 
 
 " Enable omni completion.
@@ -496,13 +511,13 @@ autocmd FileType php inoremap <C-p> <ESC>:call pdv#DocumentWithSnip()<CR>i
 autocmd FileType php nnoremap <C-p> :call pdv#DocumentWithSnip()<CR>
 autocmd FileType php setlocal omnifunc=phpcd#CompletePHP
 
-" Disable arrow movement, resize splits instead.
-if get(g:, 'elite_mode')
-"	nnoremap <Up>    :resize +4<CR>
-"	nnoremap <Down>  :resize -4<CR>
-	nnoremap <Left>  :vertical resize +4<CR>
-	nnoremap <Right> :vertical resize -4<CR>
-endif
+" " Disable arrow movement, resize splits instead.
+" if get(g:, 'elite_mode')
+" "	nnoremap <Up>    :resize +4<CR>
+" "	nnoremap <Down>  :resize -4<CR>
+" 	nnoremap <Left>  :vertical resize +4<CR>
+" 	nnoremap <Right> :vertical resize -4<CR>
+" endif
 
 highlight ExtraWhitespace ctermbg=red guibg=red
 match ExtraWhitespace /\s\+$/
@@ -522,6 +537,7 @@ let g:NERDTreeNodeDelimiter = "\u00a0"
 set autoread
 " autocmd BufWritePost *.exs,*.ex silent :!mix format %
 
+autocmd BufWritePost *.js AsyncRun -post=checktime ./node_modules/.bin/eslint --fix %
 
 function! s:fzf_neighbouring_files()
   let current_file =expand("%")
@@ -562,3 +578,107 @@ let g:lightline = {
       \   'gitbranch': 'gitbranch#name'
       \ },
       \ }
+
+
+" Make naughty characters visible...
+" (uBB is right double angle, uB7 is middle dot)
+set lcs=tab:»·,trail:␣,nbsp:˷
+highlight InvisibleSpaces ctermfg=Black ctermbg=Black
+call matchadd('InvisibleSpaces', '\S\@<=\s\+\%#\ze\s*$', -10)
+"=====[ Cut and paste from the system clipboard ]====================
+
+" When in Normal mode, paste over the current line...
+nmap  <C-P> 0d$"*p
+
+" When in Visual mode, paste over the selected region...
+xmap  <C-P> "*pgv
+
+" In Normal mode, yank the entire buffer...
+nmap <C-C> 1G"*yG``:call YankedToClipboard()<CR>
+
+" In Visual mode, yank the selection...
+xmap  <C-C> "*y:call YankedToClipboard()<CR>
+
+function! YankedToClipboard ()
+    let block_of = (visualmode() == "\<C-V>" ? 'block of ' : '')
+    let N = strlen(substitute(@*, '[^\n]\|\n$', '', 'g')) + 1
+    let lines = (N == 1 ? 'line' : 'lines')
+    echo block_of . N lines 'yanked to clipboard'
+endfunction
+"=====[ Completion during search (via Command window) ]======================
+
+function! s:search_mode_start()
+    cnoremap <tab> <c-f>:resize 1<CR>a<c-n>
+    let s:old_complete_opt = &completeopt
+    let s:old_last_status = &laststatus
+    set completeopt-=noinsert
+    set laststatus=0
+endfunction
+
+function! s:search_mode_stop()
+    try
+        silent cunmap <tab>
+    catch
+    finally
+        let &completeopt = s:old_complete_opt
+        let &laststatus  = s:old_last_status
+    endtry
+endfunction
+
+augroup SearchCompletions
+    autocmd!
+    autocmd CmdlineEnter [/\?] call <SID>search_mode_start()
+    autocmd CmdlineLeave [/\?] call <SID>search_mode_stop()
+augroup END
+
+"=====[ Change cursor during insertion ]======================
+
+let &t_SI="\033[5 q" " start insert mode, switch to blinking cursor
+let &t_EI="\033[1 q" " end insert mode, back to square
+
+"=====[ Make multi-selection incremental search prettier ]======================
+
+augroup SearchIncremental
+    autocmd!
+    autocmd CmdlineEnter [/\?]   highlight  Search  ctermfg=DarkRed   ctermbg=Black cterm=NONE
+    autocmd CmdlineLeave [/\?]   highlight  Search  ctermfg=White ctermbg=Black cterm=bold
+augroup END
+
+
+" Make the completion popup look menu-ish on a Mac...
+highlight  Pmenu        ctermbg=white   ctermfg=black
+highlight  PmenuSel     ctermbg=blue    ctermfg=white   cterm=bold
+highlight  PmenuSbar    ctermbg=grey    ctermfg=grey
+highlight  PmenuThumb   ctermbg=blue    ctermfg=blue
+
+" Make diffs less glaringly ugly...
+highlight DiffAdd     cterm=bold ctermfg=green     ctermbg=black
+highlight DiffChange  cterm=bold ctermfg=grey      ctermbg=black
+highlight DiffDelete  cterm=bold ctermfg=black     ctermbg=black
+highlight DiffText    cterm=bold ctermfg=magenta   ctermbg=black
+
+
+
+"====[ Show when lines extend past column 80 ]=================================>!<============
+
+highlight ColorColumn ctermfg=208 ctermbg=Black
+
+function! MarkMargin (on)
+    if exists('b:MarkMargin')
+        try
+            call matchdelete(b:MarkMargin)
+        catch /./
+        endtry
+        unlet b:MarkMargin
+    endif
+    if a:on
+        let b:MarkMargin = matchadd('ColorColumn', '\%81v\s*\zs\S', 100)
+    endif
+endfunction
+
+augroup MarkMargin
+    autocmd!
+    autocmd  BufEnter  *       :call MarkMargin(1)
+    autocmd  BufEnter  *.vp*   :call MarkMargin(0)
+augroup END
+
