@@ -7,7 +7,6 @@ set smartcase
 set encoding=utf8
 set mouse=nicr
 
-
 set directory^="$HOME/.vim/tmp/"
 let g:netrw_liststyle = 3
 set encoding=UTF-8
@@ -191,7 +190,7 @@ set laststatus=2
 let g:elite_mode=1
 
 " Enable highlighting of the current line
-"set cursorline
+set cursorline
 
 " Theme and Styling
 set t_Co=256
@@ -511,14 +510,6 @@ autocmd FileType php inoremap <C-p> <ESC>:call pdv#DocumentWithSnip()<CR>i
 autocmd FileType php nnoremap <C-p> :call pdv#DocumentWithSnip()<CR>
 autocmd FileType php setlocal omnifunc=phpcd#CompletePHP
 
-" " Disable arrow movement, resize splits instead.
-" if get(g:, 'elite_mode')
-" "	nnoremap <Up>    :resize +4<CR>
-" "	nnoremap <Down>  :resize -4<CR>
-" 	nnoremap <Left>  :vertical resize +4<CR>
-" 	nnoremap <Right> :vertical resize -4<CR>
-" endif
-
 highlight ExtraWhitespace ctermbg=red guibg=red
 match ExtraWhitespace /\s\+$/
 autocmd BufWinEnter * match ExtraWhitespace /\s\+$/
@@ -580,11 +571,6 @@ let g:lightline = {
       \ }
 
 
-" Make naughty characters visible...
-" (uBB is right double angle, uB7 is middle dot)
-set lcs=tab:»·,trail:␣,nbsp:˷
-highlight InvisibleSpaces ctermfg=Black ctermbg=Black
-call matchadd('InvisibleSpaces', '\S\@<=\s\+\%#\ze\s*$', -10)
 "=====[ Cut and paste from the system clipboard ]====================
 
 " When in Normal mode, paste over the current line...
@@ -631,11 +617,6 @@ augroup SearchCompletions
     autocmd CmdlineLeave [/\?] call <SID>search_mode_stop()
 augroup END
 
-"=====[ Change cursor during insertion ]======================
-
-let &t_SI="\033[5 q" " start insert mode, switch to blinking cursor
-let &t_EI="\033[1 q" " end insert mode, back to square
-
 "=====[ Make multi-selection incremental search prettier ]======================
 
 augroup SearchIncremental
@@ -644,21 +625,11 @@ augroup SearchIncremental
     autocmd CmdlineLeave [/\?]   highlight  Search  ctermfg=White ctermbg=Black cterm=bold
 augroup END
 
-
-" Make the completion popup look menu-ish on a Mac...
-highlight  Pmenu        ctermbg=white   ctermfg=black
-highlight  PmenuSel     ctermbg=blue    ctermfg=white   cterm=bold
-highlight  PmenuSbar    ctermbg=grey    ctermfg=grey
-highlight  PmenuThumb   ctermbg=blue    ctermfg=blue
-
 " Make diffs less glaringly ugly...
 highlight DiffAdd     cterm=bold ctermfg=green     ctermbg=black
 highlight DiffChange  cterm=bold ctermfg=grey      ctermbg=black
 highlight DiffDelete  cterm=bold ctermfg=black     ctermbg=black
 highlight DiffText    cterm=bold ctermfg=magenta   ctermbg=black
-
-
-
 "====[ Show when lines extend past column 80 ]=================================>!<============
 
 highlight ColorColumn ctermfg=208 ctermbg=Black
@@ -681,4 +652,3 @@ augroup MarkMargin
     autocmd  BufEnter  *       :call MarkMargin(1)
     autocmd  BufEnter  *.vp*   :call MarkMargin(0)
 augroup END
-
