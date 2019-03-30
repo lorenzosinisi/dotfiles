@@ -86,7 +86,6 @@ Plug 'benmills/vimux'
 Plug 'jeetsukumaran/vim-buffergator'
 Plug 'gilsondev/searchtasks.vim'
 Plug 'tpope/vim-dispatch'
-Plug 'Shougo/neocomplete.vim'
 Plug 'ntpeters/vim-better-whitespace'
 Plug 'airblade/vim-gitgutter'
 Plug 'craigemery/vim-autotag'
@@ -115,14 +114,13 @@ Plug 'jaxbot/github-issues.vim'
 " Erlang Support
 Plug 'vim-erlang/vim-erlang-tags'
 Plug 'vim-erlang/vim-erlang-runtime'
-Plug 'vim-erlang/vim-erlang-omnicomplete'
 Plug 'vim-erlang/vim-erlang-compiler'
 
 
 " Javascript Support
 Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
-Plug 'w0rp/ale'
+" Plug 'w0rp/ale'
 Plug 'skywind3000/asyncrun.vim'
 " Elixir Support
 Plug 'elixir-lang/vim-elixir'
@@ -133,6 +131,7 @@ Plug 'BjRo/vim-extest'
 Plug 'frost/vim-eh-docs'
 Plug 'slashmili/alchemist.vim'
 Plug 'jadercorrea/elixir_generator.vim'
+Plug 'w0rp/ale'
 " Theme / Interface
 Plug 'vim-scripts/AnsiEsc.vim'
 Plug 'ryanoasis/vim-devicons'
@@ -156,7 +155,6 @@ Plug 'atelierbram/Base2Tone-vim'
 Plug 'colepeters/spacemacs-theme.vim'
 Plug 'mileszs/ack.vim'
 Plug 'mhinz/vim-mix-format'
-
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 " OSX stupid backspace fix
@@ -188,9 +186,6 @@ set laststatus=2
 
 " Enable Elite mode, No ARRRROWWS!!!!
 let g:elite_mode=1
-
-" Enable highlighting of the current line
-set cursorline
 
 " Theme and Styling
 set t_Co=256
@@ -316,32 +311,18 @@ inoremap <leader>s <C-c>:w<cr>
   let g:ackprg = 'ag --vimgrep'
   let g:ag_lhandler="botright lopen"
   imap <C-x><C-l> <plug>(fzf-complete-line)
-nnoremap <silent> <c-p> :FZF<CR>
-" Neocomplete Settings
-let g:acp_enableAtStartup = 0
-let g:neocomplete#enable_at_startup = 1
-let g:neocomplete#enable_smart_case = 1
-let g:neocomplete#sources#syntax#min_keyword_length = 3
 
-" Define dictionary.
-let g:neocomplete#sources#dictionary#dictionaries = {
-    \ 'default' : '',
-    \ 'vimshell' : $HOME.'/.vimshell_hist',
-    \ 'scheme' : $HOME.'/.gosh_completions'
-        \ }
+nnoremap <silent> <C-p> :FZF<CR>
+" Make CtrlP go faster by ignorning .gitignore files
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
 
-" Define keyword.
-if !exists('g:neocomplete#keyword_patterns')
-    let g:neocomplete#keyword_patterns = {}
-endif
-
-let g:neocomplete#keyword_patterns['default'] = '\h\w*'
 function! s:my_cr_function()
   return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
   " For no inserting <CR> key.
   "return pumvisible() ? "\<C-y>" : "\<CR>"
 endfunction
 
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
 
 " Enable omni completion.
@@ -349,19 +330,7 @@ autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
 autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-" Enable heavy omni completion.
-if !exists('g:neocomplete#sources#omni#input_patterns')
-  let g:neocomplete#sources#omni#input_patterns = {}
-endif
-"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-
-" For perlomni.vim setting.
-" https://github.com/c9s/perlomni.vim
-let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags 
 
 " Elixir Tagbar Configuration
 let g:tagbar_type_elixir = {
@@ -441,12 +410,12 @@ command! -bang Colors
 "
 "   :Ag  - Start fzf with hidden preview window that can be enabled with "?" key
 "   :Ag! - Start fzf in fullscreen and display the preview window above
-command! -bang -nargs=* Ag
-  \ call fzf#vim#ag(<q-args>,
-  \                 <bang>0 ? fzf#vim#with_preview('up:60%')
-  \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
-  \                 <bang>0)
-
+" command! -bang -nargs=* Ag
+"   \ call fzf#vim#ag(<q-args>,
+"   \                 <bang>0 ? fzf#vim#with_preview('up:60%')
+"   \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
+"   \                 <bang>0)
+"
 " Similarly, we can apply it to fzf#vim#grep. To use ripgrep instead of ag:
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
@@ -463,16 +432,6 @@ command! -bang -nargs=? -complete=dir Files
 " Mappings configurationn
 """""""""""""""""""""""""""""""""""""
 map <C-n> :NERDTreeToggle<CR>
-map <C-m> :TagbarToggle<CR>
-
-" Omnicomplete Better Nav
-inoremap <expr> <c-j> ("\<C-n>")
-inoremap <expr> <c-k> ("\<C-p>")
-
-
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
 
 " Mapping selecting Mappings
 nmap <leader><tab> <plug>(fzf-maps-n)
@@ -574,6 +533,8 @@ let g:lightline = {
 "=====[ Cut and paste from the system clipboard ]====================
 
 " When in Normal mode, paste over the current line...
+nmap  <C-P> 0d$"*p
+
 nmap  <C-P> 0d$"*p
 
 " When in Visual mode, paste over the selected region...
